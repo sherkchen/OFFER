@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="None">
+  
+  <link rel="shortcut icon" href="img/favicon.ico">
+  <title>Home - offer之路</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Home";
+    var mkdocs_page_input_path = "index.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="js/jquery-2.1.1.min.js" defer></script>
+  <script src="js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="." class="icon icon-home"> offer之路</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="intnet/">计算机网络</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="database/">数据库</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="JVM/">jVM</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="javaGC/">GC</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="Thread/">多线程</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="lock/">多线程和并发</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href=".">offer之路</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1>TCP三次握手</h1>
+
+<p>当应用程序希望与另一应用程序建立通信时，会进行TCP三次握手。完成三次握手后，TCP将在两个应用程序建立一个全双工通信。</p>
+<p>*<code>第一次握手</code>-客户端给服务端发送一个SYN报文，并指明客户端的初始化序列号（syn=x）,此时客户端处于SYN_Send状态。</p>
+<p>*<code>第二次握手</code>-服务端在接收到客户端发送的SYN报文后对其进行确认（ack=x+1），同时以自己的SYN报文作为应答，并且也指定自己的初始化序列号（syn=y）,此时服务器处于SYN_REVD状态。</p>
+<p>*<code>第三次握手</code>-客户端在接收到SYN报文后,向服务器发送确认包ACK(ack=y+1)，此时客户端处于establised 状态。服务器收到 ACK报文之后，也处于establised 状态，此时，双方以建立起了链接。</p>
+<p>三次握手过程如下：
+        <img alt="三次握手" src="image/三次握手.png" />
+<code>SYN</code>表示请求建立连接,<code>ACK</code>表示确认序号，<code>seq</code>为标志数据包序号，<code>ack</code>确认序号（期望收到下一个数据包的序号）。</p>
+<h2 id="_1">为什么建立三次握手</h2>
+<ul>
+<li>确认客户端服务端发送和接收能力是否正常。</li>
+<li>指定客户端和服务端的初始化序列号，为后面可靠传输做准备。</li>
+</ul>
+<h4 id="_2">采用两次握手出现的问题</h4>
+<p>有这样一种情况，当A发送一个消息给B，但是由于网络原因，消息被阻塞在了某个节点，然后阻塞的时间超出设定的时间，A会认为这个消息丢失了，然后重新发送消息。当A和B通信完成后，这个被A认为失效的消息，到达了B。对于B而言，以为这是一个新的请求链接消息，就向A发送确认， 对于A而言，它认为没有给B再次发送消息（因为上次的通话已经结束）所有A不会理睬B的这个确认，但是B则会一直等待A的消息。</p>
+<p>这就导致了B的时间被浪费（对于服务器而言，CPU等资源是一种浪费），这样是不可行的，这就是为什么不能两次握手的原因了。
+第三次握手看似多余其实不然，这主要是为了防止已失效的请求报文段突然又传送到了服务端而产生连接的误判。
+<h1>TCP 4次挥手</h1>
+<em><code>第一次握手</code>：客户端发送FIN包，FIN=1,序列号seq=u,关闭客户端到服务端的数据传送，客户端处于FIN_WAITE1状态。
+<p>
+</em><code>第二次握手</code>：服务器端接收到FIN包，发送一个ACK包，ACK=1,ack=u+1,seq=v,serve进入CLOSE_WAITE状态，此时服务器可以继续发送其他数据包。
+<p>
+<em><code>第三次握手</code>：服务器端发送FIN包，用来关闭服务器到客户端的数据发送，seq=w,ack=u+1,serve进入LAST_ACK状态。
+<p>
+</em><code>第四次握手</code>：客户端收到FIN包，客户端进入TIME_WAIT状态，接着发送一个ACK包，ack=w+1，seq=u+1,serve进入CLOSED状态,完成第四次握手。</p>
+<p>4次挥手图片如下：
+        <img alt="四次挥手" src="image/四次挥手.png" /></p>
+<!-- 
+For full documentation visit 
+[mkdocs.org](https://mkdocs.org). -->
+
+<h2 id="udp">UDP</h2>
+<ul>
+<li>面向非连接，不维护连接状态。</li>
+<li>尽最大努力交付。</li>
+<li>支持广播，即同时向多个客户端传输相同信息。</li>
+<li>数据包只有8个字节（TCP20个字节），开销小。</li>
+</ul>
+<h2 id="udptcp">UDP和TCP区别</h2>
+<ul>
+<li>TCP面向连接需要维持连接状态，UDP是无连接的。</li>
+<li>TCP保证可靠性,速度相对慢；UDP尽最大努力交付，不保证可靠性。</li>
+<li>TCP利用序列号保证数据包的顺序交付，UDP是无序的。</li>
+<li>TCP占20个字节，相对较大，UDP8个字节相对较小。</li>
+</ul>
+<h1 id="url">在浏览器中键入URL后经历的过程</h1>
+<ul>
+<li>1.DNS解析，将URL转换为对应的IP（浏览器会现在本地缓存找到URL对应的IP,没有，依次到操作系统DNS缓存-&gt;操作系统的host文件-&gt;操作系统将域名发送到本地域名服务器）。</li>
+<li>2.TCP连接，找到对应的IP地址后，客户端会与服务器建立连接。</li>
+<li>3.发送HTTP请求，建立TCP连接成功后，浏览器会发送Http请求给服务器。</li>
+<li>4.服务器处理Http请求，并返回HTTP报文。</li>
+<li>5.断开TCP连接,浏览器解析渲染页面。</li>
+</ul>
+<h2 id="http">http浏览器缓存机制</h2>
+<p>待补充</p>
+<h1 id="httphttps">http和https的区别</h1>
+<p>待补充</p>
+<h2 id="getpost">get请求和POST的区别</h2>
+<p><em><code>http层面</code>-GET请求将数据放在了URLh后面，POST放在Request body里面。<p>
+</em><code>数据库层面</code>-GET请求符合幂等性（同一个url和同样的get参数，呈现给用户都是同样的结果）和安全性（get不会引起数据的变化，例如说对数据库的增删改），POST不符合。<p>
+<em><code>其他方面</code>-GET请求可以被主动缓存，还有长度限制，而PSOT不行（被动缓存）。<p>
+</em><code>细节</code>-GET产生一个TCP数据包（对于GET方式的请求，浏览器会把http header和data一并发送出去，服务器响应200（返回数据））;
+POST产生两个TCP数据包（对于POST，浏览器先发送header，服务器响应100 continue，浏览器再发送data，服务器响应200 ok（返回数据））。</p>
+<h2 id="sessioncookies">session和cookies的区别</h2>
+<p><h3 style="color:blue">cookies</h3> 
+*是由服务器发给客户端的特殊信息 。<p>
+* 客户端再次请求时，会把cookies回发。<p>
+* 服务器接收到后，会解析cookie生成与客户端对应的内容。<p>
+Cooike的设置及发送过程如图：
+<img alt="Cookie的设置过程" src="image/cookie的设置及发送过程.png" />
+<h3 style="color:blue">session</h3> 
+* 服务器端的机制，在服务器上保存信息。<p>
+* 解析客户端请求并操作session id,按需保存状态信息。<p>
+<img alt="session的设置过程" src="image/Session的实现方式.png" /></p>
+<h3 style="color:blue">区别</h3>
+
+<p>* cookies存放在浏览器上，session数据放在服务器上，cooKie不占服务器资源。<p>
+* Session相对于Cookie更安全。<p>
+（1）cookie不是很安全，别人可以分析存放在本地的cookie并进行cookie欺骗，考虑到安全应当使用session。</p>
+<p>（2）session会在一定时间内保存在服务器上。当访问增多，会比较占用你服务器的性能，考虑到减轻服务器性能方面，应当使用cookie。</p>
+<h2 id="stocket">stocket通信</h2>
+<p>socket是在应用层和传输层之间的一个抽象层，它把TCP/IP层复杂的操作抽象为几个简单的接口供应用层调用已实现进程在网络中通信。
+<img alt="sockt" src="image/socket.png" />
+<p>
+通信图：  <br />
+<img alt="sockt通信图" src="image/socket通信过程.png" /></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+      
+    </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="js/theme.js" defer></script>
+      <script src="search/main.js" defer></script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.0.4
+Build Date UTC : 2019-06-26 12:03:45
+-->

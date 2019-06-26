@@ -1,0 +1,16 @@
+site_name: offer之路
+
+image:
+    三次握手.png 
+   
+nav:
+    - 计算机网络: intnet.md
+    - 数据库: database.md
+    - jVM: JVM.md
+    - GC: javaGC.md
+    - 多线程: Thread.md
+    - 多线程和并发: lock.md
+
+    
+theme: readthedocs
+ 

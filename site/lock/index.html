@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>多线程和并发 - offer之路</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "\u591a\u7ebf\u7a0b\u548c\u5e76\u53d1";
+    var mkdocs_page_input_path = "lock.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> offer之路</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../intnet/">计算机网络</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../database/">数据库</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../JVM/">jVM</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../javaGC/">GC</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../Thread/">多线程</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">多线程和并发</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#_1">获取对象锁的两种方式</a></li>
+    
+
+    <li class="toctree-l2"><a href="#_2">获取类锁</a></li>
+    
+
+    <li class="toctree-l2"><a href="#_3">对象锁和类锁：</a></li>
+    
+
+    <li class="toctree-l2"><a href="#synchronized">synchronized 底层实现</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#_4">基础</a></li>
+        
+            <li><a class="toctree-l3" href="#jdk6synchronized">JDK6之前synchronized</a></li>
+        
+            <li><a class="toctree-l3" href="#java6synchronized">JAVA6之后，Synchronized的改进。</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#_6">自旋锁</a></li>
+    
+
+    <li class="toctree-l2"><a href="#_7">自适应自旋锁</a></li>
+    
+
+    <li class="toctree-l2"><a href="#_8">锁消除</a></li>
+    
+
+    <li class="toctree-l2"><a href="#_9">锁粗化</a></li>
+    
+
+    <li class="toctree-l2"><a href="#synchronized_1">synchronized的四种状态</a></li>
+    
+
+    <li class="toctree-l2"><a href="#sychronizedreentrantlock">sychronized和ReentrantLock的区别</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#reentrantlock">ReentrantLock(可重入锁)</a></li>
+        
+            <li><a class="toctree-l3" href="#reentrantlock_1">ReentrantLock将锁对象化</a></li>
+        
+            <li><a class="toctree-l3" href="#_10">总结</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#javajmm">java内存模型JMM</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#jvm">jvm主内存</a></li>
+        
+            <li><a class="toctree-l3" href="#jvm_1">jvm工作内存</a></li>
+        
+            <li><a class="toctree-l3" href="#_11">指令重排需要满足条件</a></li>
+        
+            <li><a class="toctree-l3" href="#volatile">volatile</a></li>
+        
+            <li><a class="toctree-l3" href="#volatile_1">volatile变量立即可见</a></li>
+        
+            <li><a class="toctree-l3" href="#volatile_2">volatile如何禁止重排优化</a></li>
+        
+            <li><a class="toctree-l3" href="#volatilesynchronized">volatile和synchronized区别</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">offer之路</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>多线程和并发</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1>Synchronized</h1>
+
+<p>锁分类：对象锁和类锁。</p>
+<h2 id="_1">获取对象锁的两种方式</h2>
+<p>1同步代码块</p>
+<pre><code>synchronized(this){
+    //相应代码块
+    //锁是小括号中的实例对象
+}
+</code></pre>
+
+<p>2同步非静态方法（synchronized method),锁是当前对象的实例对象。</p>
+<h2 id="_2">获取类锁</h2>
+<p>1同步代码块</p>
+<pre><code>synchronized(类.class){}
+</code></pre>
+
+<p>2同步静态方法（synchronized static method）</p>
+<h2 id="_3">对象锁和类锁：</h2>
+<p><em>当一个线程获取对象锁后，另一个线程可以访问该对象的非同步方法。<p>
+</em>同一个类各个对象的对象锁互不干扰，类锁和对象锁互不干扰。</p>
+<h2 id="synchronized">synchronized 底层实现</h2>
+<h3 id="_4">基础</h3>
+<p>对象头  Monitor<p></p>
+<h4 id="_5">对象在内存中的布局</h4>
+<p>对象头 实例数据 对齐填充<p>
+对象头由<font color="red"> Mark Word</font>和<font color="red"> Class Metadata Address</font>
+<img alt="对象头的结构" src="../image/lock/对象头结构.png" />
+Mark word结构：
+<img alt="MarkWord结构" src="../image/lock/MarkWord.png" /></p>
+<h4 id="monitor">Monitor</h4>
+<p>Monitor:每个java对象天生自带的一把看不见的锁。</p>
+<pre><code>ObjectMonitor() {
+    _header       = NULL;//markOop对象头
+    _count        = 0;   //得到锁计数+1，重入一次再加1
+    _waiters      = 0,//等待线程数
+    _recursions   = 0;//重入次数
+    //监视器锁寄生的对象。锁不是平白出现的，而是寄托存储于对象中
+    _object       = NULL;    
+    _owner        = NULL;//指向获得ObjectMonitor对象的线程或基础锁
+    _WaitSet      = NULL;//处于wait状态的线程，会被加入到wait set；
+    _WaitSetLock  = 0 ;
+    _Responsible  = NULL ;
+    _succ         = NULL ;
+    _cxq          = NULL ;
+    FreeNext      = NULL ;
+    _EntryList    = NULL ;//处于等待锁的线程，会被加入到entry set；
+    _SpinFreq     = 0 ;
+    _SpinClock    = 0 ;
+    OwnerIsThread = 0 ;// _owner is (Thread *) vs SP/BasicLock
+   _previous_owner_tid = 0; // 监视器前一个拥有者线程的ID  }
+
+</code></pre>
+
+<p><img alt="Monitor" src="../image/lock/Monitor.png" /></p>
+<h3 id="jdk6synchronized">JDK6之前synchronized</h3>
+<p><em>属于重量级锁，依赖于Mutex Lock实现。
+</em>线程之间切换需要从用户态转到核心态，开销大。</p>
+<h3 id="java6synchronized">JAVA6之后，Synchronized的改进。</h3>
+<p>待补充</p>
+<h2 id="_6">自旋锁</h2>
+<p>通过线程执行忙循环等待锁的释放，不让出CPU。共享数据的锁定状态持续时间较短，切换线程不值得，避免线程之间的开销。<p>
+缺点：若锁被其他线程长时间占用，会带来许多性能上的开销。（改进：通过-XX:PreBlockSpin设定自旋次数 ，如果超过该值，释放CPU)。</p>
+<h2 id="_7">自适应自旋锁</h2>
+<p><em>自旋的次数不再固定。
+</em>由前一次在同一个锁上的自旋时间及锁的拥有者的状态来决定。</p>
+<h2 id="_8">锁消除</h2>
+<h2 id="_9">锁粗化</h2>
+<h2 id="synchronized_1">synchronized的四种状态</h2>
+<p>无锁，偏向锁，轻量级锁，重量级锁。<br />
+锁的升级方向：无锁——&gt;偏向锁——&gt;轻量级锁——&gt;重量级锁。
+<font color="red">偏向锁：</font>减少同一线程获取锁的代价<p>
+    大多数情况下，所不存在多线程竞争，总是由同一个线程多次获得。
+    核心思想：如果一个线程获得了锁，就进入偏向锁模式，此时MarkWord 的结构也变成了偏向锁，当线程再次请求锁时，无需再做任何同步操作，即获取锁的过程只需要检查Mark word的锁标记为偏向锁以及当前线程ID等于MarkWord的ThreadID即可。这样就省去了大量有关锁申请的操作。不适用于锁竞争激烈的多线程场合<p></p>
+<p><font color="red">轻量级锁</font>：由偏向锁升级来的，偏向锁运行在一个线程进入同步块的情况下，当第二个线程加入锁争用的时候，偏向锁就升级为轻量级锁。
+适应场景线程交替执行同步块。若存在同一时间访问同一锁的情况，轻量级锁就会升级为重量级锁。<p>
+锁汇中：
+<img alt="偏轻重锁的区别" src="../image/lock/偏轻重锁的区别.png" /></p>
+<h2 id="sychronizedreentrantlock">sychronized和ReentrantLock的区别</h2>
+<h3 id="reentrantlock">ReentrantLock(可重入锁)</h3>
+<p><em><code>1</code>:位于java.util.comcurrent.locks包。 <p>
+</em><code>2</code>:和CountDownLatch，FutureTsak,Semaphore一样基于AQS实现。<p>
+<em><code>3</code>:能够实现比Synchronized更细粒度的控制，控制公平,synchroized非公平。 <p>
+</em><code>4</code>:调用lock()后必须调用unlock()释放锁。<p></p>
+<pre><code>   //设置公平锁，将赋予等待时间最久的线程(即按获取锁的先后顺序调用lock方法)
+  ReentrantLock fairLock=new ReentrantLock(true);
+</code></pre>
+
+<h3 id="reentrantlock_1">ReentrantLock将锁对象化</h3>
+<p><em><code>1</code>:判断是否有线程在排队等待锁。<p>
+</em><code>2</code>:带超时的获取锁尝试，如果超时则放弃获取(tryLock(long time, TimeUnit unit))。<p>
+*<code>3</code>:能感知有没有成功获取锁。</p>
+<pre><code>isFair()        //判断锁是否是公平锁
+isLocked()    //判断锁是否被任何线程获取了
+
+isHeldByCurrentThread()   //判断锁是否被当前线程获取了
+
+hasQueuedThreads()   //判断是否有线程在等待该锁
+</code></pre>
+
+<h3 id="_10">总结</h3>
+<p><em>synchronized是关键字，ReentranLock是类。<p>
+</em>ReentrantLock可以对获取锁的等待时间进行设置，避免死锁。<p>
+<em>ReentrantLock可以获取各种锁信息。<p>
+</em>ReentrantLock可以灵活实现多路通知。<p>
+* <font color="red">机制</font>：sync操作Mark Word,lock()调用Unsafe类的park()方法。</p>
+<h2 id="javajmm">java内存模型JMM</h2>
+<p>java内存模型是一个抽象概念，描述了程序中各个变量的访问规则,、java内存模型对并发提供的保障：原子性、可见性。有序性。
+<img alt="JMM" src="../image/lock/JMM.png" /></p>
+<h3 id="jvm">jvm主内存</h3>
+<ul>
+<li>存储java实例对象，包括（成员变量，类信息，常量，静态变量等），属于数据共享区域，多线程并发操作时会引起线程安全。</li>
+</ul>
+<h3 id="jvm_1">jvm工作内存</h3>
+<p>*存储当前方法的所有本地变量信息，对其他线程不可见。属于线程私有信息，不存在线程安全问题。每个线程都对应着一个工作线程，主内存中的变量都会复制一份到每个线程的自己的工作空间，线程对变量的操作都在自己的工作内存中，操作完成后再将变量更新至主内存。</p>
+<h3 id="_11">指令重排需要满足条件</h3>
+<p>java的编译器会对代码进行优化，进行指令重排。指令重排必须满足的条件如下：<p>
+<em>在单线程下不能改变程序运行结果<p>
+</em>存在数据依赖关系的不允许重排。不存在happen-before的才能指令重排。如果操作Ahappens-before 操作B,那么操作A在内存上所做操作都对B所见。<p></p>
+<h3 id="volatile">volatile</h3>
+<p>Volatile是java虚拟机提供的最轻量级的同步机制，它具有可见性和有序性，但不保证原子性。<p></p>
+<h3 id="volatile_1">volatile变量立即可见</h3>
+<p>当写一个volatile变量时，JMM会把该线程对应的工作内存中的共享变量刷新到主内存中。<p>
+当读取一个volatile变量时，JMM会把该线程对应的工作内存设置为无效。</p>
+<h3 id="volatile_2">volatile如何禁止重排优化</h3>
+<p>volatile实际上就使用到了内存屏障技术来保证其变量的修改对其他CPU立即可见。内存屏障保证了特定操作的执行顺序。<p>
+通过插入 内存屏障指令禁止内存屏障前后的指令执行重排优化。</p>
+<h3 id="volatilesynchronized">volatile和synchronized区别</h3>
+<p><em>volatile本质是在告诉jvm当前变量在寄存器（工作内存）中的值是不确定的，需要从主存中读取； synchronized则是锁定当前变量，只有当前线程可以访问该变量，其他线程被阻塞住。<p>
+</em>volatile仅能使用在变量级别； synchronized则可以使用在变量、方法、和类级别的<p>
+<em>volatile不会造成线程的阻塞； synchronized可能会造成线程的阻塞。<p>
+</em>volatile标记的变量不会被编译器优化；synchronized标记的变量可以被编译器优化<p>
+*volatile仅能实现变量的修改可见性，并不能保证原子性；synchronized则可以保证变量的修改可见性和原子性</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../Thread/" class="btn btn-neutral" title="多线程"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../Thread/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>

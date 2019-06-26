@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>GC - offer之路</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "GC";
+    var mkdocs_page_input_path = "javaGC.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> offer之路</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../intnet/">计算机网络</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../database/">数据库</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../JVM/">jVM</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">GC</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#_1">对象被判定为垃圾的标准</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#_2">引用计数法</a></li>
+        
+            <li><a class="toctree-l3" href="#_4">可达性分析</a></li>
+        
+            <li><a class="toctree-l3" href="#_5">垃圾回收算法。</a></li>
+        
+            <li><a class="toctree-l3" href="#object-finalizec">Object finalize()方法作用与C++析构函数作用区别</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../Thread/">多线程</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../lock/">多线程和并发</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">offer之路</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>GC</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1>java垃圾回收机制</h1>
+
+<h1 id="_1">对象被判定为垃圾的标准</h1>
+<p>当某个对象不被引用。<p>
+方法：引用计数法和和可达性分析。<p></p>
+<h2 id="_2">引用计数法</h2>
+<p>通过判断对象的引用数量来决定对象是否可以被回收。<p>
+每个对象都有一个引用计数器，每当有一个地方引用它，则计数器+1，引用失效-1。当任何引用计数为0的对象实列可以被当作垃圾收集。</p>
+<h3 id="_3">优点,缺点</h3>
+<p>优点：执行效率高，程序执行受影响较小。<p>
+缺点：无法检测出循环引用的情况，导致内存泄漏。</p>
+<h2 id="_4">可达性分析</h2>
+<p>通过一系列名为GCRoot的对象作为起始点，从这些节点开始向下搜索，搜索走过的路径称为引用链，当一个对象到GCROOT没有任何引用链相连时，对象为不可达，即判定为可回收对象。</p>
+<h3 id="gcroot">可以作为GCROOt对象的有：</h3>
+<p><em>a：虚拟机栈中所引用的对象。<p>
+</em>b：方法区中类静态属性引用的对象。<p>
+<em>c：方法区常量引用的对象。<p>
+</em>d:本地方法栈中JNI的引用对象。<p></p>
+<h2 id="_5">垃圾回收算法。</h2>
+<p>标记-清除算法，复制算法，标记整理算法，分代收集算法 </p>
+<h3 id="-">标记-清除算法</h3>
+<p>分为两个阶段：标记和清除。<p>
+<em><code>标记</code>:从根（GCROOT）集合进行扫描，对存活对象进行标记。<p>
+</em><code>清理</code>:对堆内存进行从头到尾进行扫描，回收不可达对象。<p>
+缺点：容易产生大量内存碎片，如果空闲碎片太多，当程序分配大对象时容易产生GC。</p>
+<h3 id="_6">制算法</h3>
+<p><em>将内存按容量分为大小相等两块。<p>
+</em>在其中一块分配对象。当这块内存使用完。<p>
+<em>将存活的对象按顺序复制到另一块上。把已使用的内存一次清理掉。这样
+不用考虑内存碎片的问题，只要移动堆顶指针，按顺序分配即可。<p>
+优点：
+</em>不会产生内存碎片。<p>
+<em>顺序分配内存简单高效。<p>
+</em>使用于对象存活率低的场景。<p></p>
+<h3 id="_7">标记整理算法</h3>
+<p><em>'标记'：从根（GCROOT）集合进行扫描，对存活对象进行标记。<p>
+</em>'清除':移动所有存活对象都一端(按照内存地址顺序依次排列)，然后将末端内存地址以后的内存全部回收。<p>
+优点：避免了产生内存碎片，且不用设置两块内存互换。</p>
+<h3 id="_8">分代收集算法</h3>
+<p>年轻代对象存活率低，采用复制算法。
+老年代中因为对象存活率高、没有额外空间对它进行分配担保，就
+必须使用“标记-清理”或者“标记-整理”算法来进行回收。</p>
+<h4 id="java">java垃圾回收机制</h4>
+<p>GC分类：Minor GC(年轻代)和Full GC。
+<font color="red">Minor GC</font>
+发生MinorGC（Eden满触发),采用复制算法（年轻代分为Eden区和两个Surivor区)<p></p>
+<pre><code>年轻代分为eden区、from区、to区，新建对象总是在eden区中被创建，当eden区空间已满，就触发一次Minorgc，将还被使用的对象复制到from区，这样整个eden区都是未被使用的空间，可供继续创建对象，当eden区再次用完，再触发一次Minorgc，将eden区和from区还在被使用的对象复制到to区，下一次Minorgc则是将eden区和to区还被使用的对象复制到from区。因此，经过多次Minorgc，某些对象会在from区和to区多次复制，如果
+超过某个阈值对象还未被释放，则将对象复制到老年代。如果老年代空间也已用完，那么就会触发fullgc，即所谓的全量回收。
+</code></pre>
+
+<p>1、复制对象无法全部放入Survivor，只好通过分配担保机制提前转移到老年代中<p>
+2、大对象（长字符串或长数组等需要大量连续空间的对象）直接进入老年代(防止大对象在eden和Survivor中经常复制）通过<font color="red">-XX:PretenureSizeThreshold</font>参数设置（如3MB），大于这个参数的直接进入老年代<p>
+3、长期存活对象进入老年代（默认15岁）</p>
+<h3 id="_9">调优参数</h3>
+<p>-XX:SurvivorRatio:Eden和Survivor的比值，默认8：1<p>
+-XX:NewRatio:老年代和年轻代的比值。
+-XX:MaxTenuringThreshold:对象从年轻代晋升为老年代经过GC次数的最大阈值。</p>
+<h3 id="_10">老年代</h3>
+<p>触发FULLGC的条件:
+1、每次进行MinorGC时，JVM会计算Survivor区移至老年区的对象的平均大小，如果这个值大于老年区的剩余值大小则进行一次FullGC<p>
+2、老年代空间不足时触发FullGC，只有在新生代对象转入或创建为大对象、大数组时才会出现不足的现象（大对象直接进入老年代），分配担保<p>
+3、永久代满（永久代JDK8被移除,java8元空间根本地内存关联）<p>
+4.调用System.GC(肯能会触发)<p></p>
+<h2 id="object-finalizec">Object finalize()方法作用与C++析构函数作用区别</h2>
+<p>C++的析构函数调用是确定，而finalize()是不确定的。
+使在可达性分析算法中不可达的对象，也并非是“非死不可”的，这时候它们暂时处于“缓刑”阶段，要真正宣告一个对象死亡，至少要经历两次标记过程。标记的前提是对象在进行可达性分析后发现没有与GCRoots相连接的引用链。
+<em><code>第一次标记</code>:如果对象在进行可达性分析后发现没有与GC Roots相连接的引用链，那它将会被第一次标记并且进行一次筛选，筛选的条件是此对象是否有必要执行finalize()方法。当对象没有覆盖finalize()方法，或者finalize()方法已经被虚拟机调用过，虚拟机将这两种情况都视为“没有必要执行”，被回收。
+如果这个对象被判定为有必要执行finalize方法，那么这个对象将会放置在一个叫做<font color="red">F-Queue</font>的队列之中，并在稍后由一个由虚拟机自动建立的、低优先级的Finalizer线程去执行它(不保证finalize方法会执行完，随时可能终止)。<p>
+</em><code>第二次标记</code>：GC将对F-Queue中的对象进行第二次小规模的标记，如果对象要在finalize()中成功拯救自己——只要重新与引用链上的任何一个对象建立关联即可，譬如把自己（this关键字）赋值给某个类变量或者对象的成员变量，那在第二次标记时它将被移除出“即将回收”的集合；如果对象这时候还没有逃脱，那基本上它就真的被回收了。(为对象提供了重生的机会)</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../Thread/" class="btn btn-neutral float-right" title="多线程">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../JVM/" class="btn btn-neutral" title="jVM"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../JVM/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../Thread/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>
