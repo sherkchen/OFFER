@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>多线程 - offer之路</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "\u591a\u7ebf\u7a0b";
+    var mkdocs_page_input_path = "Thread.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> offer之路</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../intnet/">计算机网络</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../database/">数据库</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../JVM/">jVM</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../javaGC/">GC</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">多线程</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#threadrunstart">Thread的run()和start()的区别</a></li>
+    
+
+    <li class="toctree-l2"><a href="#threadrunnabel">Thread类和Runnabel的关系</a></li>
+    
+
+    <li class="toctree-l2"><a href="#run">如何给run()方法传参</a></li>
+    
+
+    <li class="toctree-l2"><a href="#_1">如何处理线程的返回值</a></li>
+    
+
+    <li class="toctree-l2"><a href="#_2">线程的状态</a></li>
+    
+
+    <li class="toctree-l2"><a href="#threadsleepobjectwait">Thread.sleep()和Object.wait()的区别</a></li>
+    
+
+    <li class="toctree-l2"><a href="#notifynotifyall">notify()和notifyAll()区别</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#yield">yield的函数</a></li>
+        
+            <li><a class="toctree-l3" href="#_3">如何中断线程</a></li>
+        
+            <li><a class="toctree-l3" href="#_4">线程间状态转换图</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../lock/">多线程和并发</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">offer之路</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>多线程</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1>进程和线程的区别</h1>
+
+<p>进程是系统资源分配的基本单位,线程是CPU调度和分派的基本单位，线程属于某个进程，共享其资源。
+<em>所有与进程有关的资源被记录在PCB中；<p>
+</em>线程只由堆栈寄存器和，程序计数器和TCB组成。<p>
+<font color="red">区别</font><p>
+<em>线程不能看作独立应用，而进程可看做独立资源。<p>
+</em>进程有独立的地址空间，相互不影响，线程只是进程的不同执行路径。<p>
+<em>线程没有独立空间，多进程程序比多线程程序健壮。<p>
+</em>进程切换比线程的切换开销大。<p>
+<font color="red">java进程和线程关系 </font></p>
+<p><em>运行一个程序会产生一个进程，进程包含至少一个线程<p>
+</em>每个进程对应一个JVM实例，多个线程共享JVM堆<p>
+*java采用单线程编程模型，程序会自动创建主线程<p></p>
+<h1 id="threadrunstart">Thread的run()和start()的区别</h1>
+<p>start方法会创建一个子线程并启动，去执行run方法。<p>
+run()方法只是thread的一个普通方法，调用它仍然在子线程进行。<p>
+<img alt="run和start" src="../image/thread/start和run方法区别.png" /></p>
+<h1 id="threadrunnabel">Thread类和Runnabel的关系</h1>
+<p>Thread实现了Runnable接口。接口Runnable只有一个run方法。
+*Runnable创建线程</p>
+<pre><code>public class RunableTest implements  Runnable {
+    //step1：实现runable接口
+    @Override
+    public void run() {
+        System.out.println(&quot;线程执行体&quot;);
+    }
+
+    public static void main(String[] args) {
+        //创建runable接口实现类对象
+        RunableTest runableTest = new RunableTest();
+        //创建Thread对象，传入runable接口实现类对象
+        Thread thread = new Thread(runableTest);
+        //启动线程
+        thread.start();
+        System.out.println(&quot;线程正在启动&quot;);
+        for (int i = 0; i &lt; 100; i++) {
+            System.out.println(&quot;主线程执行体&quot;);
+        }
+    }
+}
+</code></pre>
+
+<p>关系：
+<em>Thread类实现了Runnable接口的类，使得run方法支持多线程。
+</em>因为类的单一继承原则，推荐使用Runnable接口创建线程。</p>
+<h1 id="run">如何给run()方法传参</h1>
+<h1 id="_1">如何处理线程的返回值</h1>
+<p>1主线程等待法（slee等待子线程完成）。<p>
+2使用主线程的join()方法以等待子线程完毕。 <p>
+3.通过Callable接口实现：FutureTask Or 线程池去获取。<p></p>
+<pre><code>import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+
+/*
+ * 一、创建执行线程的方式三：实现 Callable 接口。 相较于实现 Runnable 接口的方式，方法可以有返回值，并且可以抛出异常。
+ *
+ * 二、执行 Callable 方式，需要 FutureTask 实现类的支持，用于接收运算结果。  FutureTask 是  Future 接口的实现类
+ */
+public class TestCallable {
+
+    public static void main(String[] args) {
+        ThreadDemo td = new ThreadDemo();
+
+        //1.执行 Callable 方式，需要 FutureTask 实现类的支持，用于接收运算结果。
+        FutureTask&lt;Integer&gt; result = new FutureTask&lt;&gt;(td);
+
+        new Thread(result).start();
+
+        //2.接收线程运算后的结果
+        try {
+            Integer sum = result.get();  //FutureTask 可用于 闭锁 类似于CountDownLatch的作用，在所有的线程没有执行完成之后这里是不会执行的
+            System.out.println(sum);
+            System.out.println(&quot;------------------------------------&quot;);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+}
+
+class ThreadDemo implements Callable&lt;Integer&gt; {
+
+    @Override
+    public Integer call() throws Exception {
+        int sum = 0;
+
+        for (int i = 0; i &lt;= 100000; i++) {
+            sum += i;
+        }
+
+        return sum;
+    }
+
+}
+</code></pre>
+
+<p>*通过线程池返回结果</p>
+<pre><code>public class Main {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        //创建一个Callable1，5秒后返回String类型
+        Callable myCallable = new Callable() {
+                @Override
+                public String call() throws Exception {
+                    Thread.sleep(5000);
+                    System.out.println(&quot;calld方法执行了&quot;);
+                    return &quot;call方法返回值&quot;;
+                }
+            };
+        ////创建一个Callable2，5秒后返回String类型
+        Callable myCallable2 = new Callable() {
+            @Override
+            public String call() throws Exception {
+                Thread.sleep(3000);
+                System.out.println(&quot;calld2方法执行了&quot;);
+                return &quot;call2方法返回值&quot;;
+            }
+        };
+        System.out.println(&quot;提交任务之前 &quot;+getStringDate());
+        Future future = executor.submit(myCallable);
+        Future future2 = executor.submit(myCallable2);
+        System.out.println(&quot;提交任务之后 &quot;+getStringDate());
+        System.out.println(&quot;开始获取第一个返回值 &quot;+getStringDate());
+        System.out.println(&quot;获取返回值: &quot;+future.get());
+        System.out.println(&quot;获取第一个返回值结束，开始获取第二个返回值 &quot;+getStringDate());
+        System.out.println(&quot;获取返回值2: &quot;+future2.get());
+        System.out.println(&quot;获取第二个返回值结束 &quot;+getStringDate());
+            }
+    public static String getStringDate() {
+        Date currentTime = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat(&quot;HH:mm:ss&quot;);
+        String dateString = formatter.format(currentTime);
+        return dateString;
+    }
+}
+
+</code></pre>
+
+<p>输出：</p>
+<pre><code>提交任务之前 14:14:47
+提交任务之后 14:14:48
+开始获取第一个返回值 14:14:48
+calld2方法执行了
+calld方法执行了
+获取返回值: call方法返回值
+获取第一个返回值结束，开始获取第二个返回值 14:14:53
+获取返回值2: call2方法返回值
+获取第二个返回值结束 14:14:53
+</code></pre>
+
+<h1 id="_2">线程的状态</h1>
+<p>6个状态</p>
+<h1 id="threadsleepobjectwait">Thread.sleep()和Object.wait()的区别</h1>
+<p>Thread.sleep()会让出CPU,但不会释放锁。
+Object.wait()不仅会让出CPU,而且还会释放占用同步资源的锁。</p>
+<h1 id="notifynotifyall">notify()和notifyAll()区别</h1>
+<p>两个概念：锁池，等待池。
+锁池：假设线程A已经拥有对象锁，线程B、C想要获取锁就会被阻塞，进入一个地方去等待锁的等待，这个地方就是该对象的锁池；<p>
+等待池：假设线程A调用某个对象的wait方法，线程A就会释放该对象锁，同时线程A进入该对象的等待池中，进入等待池中的线程不会去竞争该对象的锁。<p>
+*1、notify只会随机选取一个处于等待池中的线程进入锁池去竞争获取锁的机会；<p></p>
+<p>*2、notifyAll会让所有处于等待池的线程全部进入锁池去竞争获取锁的机会；<p></p>
+<h2 id="yield">yield的函数</h2>
+<p>yield当调用Thread.yield()函数的时候，回给线程调度器一个当前线程愿意让出CPU的使用的暗示，但是线程调度器可能会忽略这个暗示。对锁的行为无影响。</p>
+<h2 id="_3">如何中断线程</h2>
+<p>已被抛弃的方法通过调用Stop方法。<p>
+调用Interrupt()方法。通知线程 该中断了。
+1如果线程处于阻塞状态，那么线程将立即退出阻塞状态，并抛出一个InterruptedException异常。
+2如果线程处于正常活动，那么会将该线程的中断标志位设为True.线程将继续正常运行，不受影响。因此需要调用线程配合中断。(1)在正常运行任务时，经常检查本线程的中断标志位，如果被设置了中断标志位就自行停止线程。</p>
+<h2 id="_4">线程间状态转换图</h2>
+<p><img alt="线程间状态转换" src="../image/thread/线程间状态转换.png" /></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../lock/" class="btn btn-neutral float-right" title="多线程和并发">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../javaGC/" class="btn btn-neutral" title="GC"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../javaGC/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../lock/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>
